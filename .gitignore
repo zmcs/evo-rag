@@ -1,0 +1,15 @@
+# Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+
+# Secrets (API keys will go here later)
+.env
+
+# Mac
+.DS_Store
+
+# Large or generated data
+data/raw/
+data/cache/
