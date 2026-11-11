@@ -20,5 +20,5 @@ class PipelineConfig(BaseModel):
     reranker: bool = False
 
     # --- Generation: how the answer is written ---
-    generator: str = "small-cheap-model"  # becomes a Literal once models are chosen
-    prompt_template: str = "default"  # later: evolved by the LLM mutator
+    generator: Literal["gemini-3.5-flash-lite"] = "gemini-3.5-flash-lite"
+    prompt_template: str = "default"  # a key of PROMPT_TEMPLATES; later evolved by the LLM mutator
