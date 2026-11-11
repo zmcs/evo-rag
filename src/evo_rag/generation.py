@@ -35,7 +35,9 @@ def format_context(chunks: list[Chunk]) -> str:
     return "\n\n".join(f"[{i}] {chunk.text}" for i, chunk in enumerate(chunks, 1))
 
 
-def generate_answer(question: str, chunks: list[Chunk], config: PipelineConfig, llm: LLM) -> LLMResponse:
+def generate_answer(
+    question: str, chunks: list[Chunk], config: PipelineConfig, llm: LLM, cache_salt: int = 0
+) -> LLMResponse:
     template = PROMPT_TEMPLATES[config.prompt_template]
     prompt = template["user"].format(context=format_context(chunks), question=question)
-    return llm.generate(model=config.generator, prompt=prompt, system=template["system"])
+    return llm.generate(model=config.generator, prompt=prompt, system=template["system"], cache_salt=cache_salt)

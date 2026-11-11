@@ -83,12 +83,20 @@ class LLM:
         temperature: float = 0.0,
         max_output_tokens: int = 512,
         thinking_level: str = "minimal",
+        json_mode: bool = False,
+        cache_salt: int = 0,
     ) -> LLMResponse:
+        """Call the model, or return the cached response for an identical request.
+
+        json_mode   ask the model to reply with JSON only
+        cache_salt  a different value forces a fresh API call (used to measure noise)
+        """
         settings = dict(
             model=model, prompt=prompt, system=system, temperature=temperature,
-            max_output_tokens=max_output_tokens, thinking_level=thinking_level,
+            max_output_tokens=max_output_tokens, thinking_level=thinking_level, json_mode=json_mode,
         )
-        key = hashlib.sha256(json.dumps(settings, sort_keys=True).encode()).hexdigest()
+        key_material = settings | ({"salt": cache_salt} if cache_salt else {})
+        key = hashlib.sha256(json.dumps(key_material, sort_keys=True).encode()).hexdigest()
         row = self.db.execute("SELECT response FROM cache WHERE key = ?", (key,)).fetchone()
         if row:
             return LLMResponse(**(json.loads(row[0]) | {"cached": True}))
@@ -110,7 +118,9 @@ class LLM:
         self.db.commit()
         return response
 
-    def _call_with_retries(self, model, prompt, system, temperature, max_output_tokens, thinking_level, attempts=5):
+    def _call_with_retries(
+        self, model, prompt, system, temperature, max_output_tokens, thinking_level, json_mode, attempts=5
+    ):
         from google.genai import errors, types
 
         config = types.GenerateContentConfig(
@@ -118,6 +128,7 @@ class LLM:
             temperature=temperature,
             max_output_tokens=max_output_tokens,
             thinking_config=types.ThinkingConfig(thinking_level=thinking_level),
+            response_mime_type="application/json" if json_mode else None,
         )
         for attempt in range(attempts):
             try:
