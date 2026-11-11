@@ -1,1 +1,2 @@
 # evo-rag
+Corpus: Regulation (EU) 2024/1689 as published in OJ L, 12.7.2024. Later amendments, including Regulation (EU) 2026/1744, are not included. QA pairs were drafted by an LLM, quote-validated automatically, and verified by hand.
