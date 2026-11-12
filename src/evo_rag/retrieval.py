@@ -44,9 +44,15 @@ class Embedder:
 
         model_name, self.query_prefix, self.passage_prefix = EMBEDDERS[name]
         self.model = SentenceTransformer(model_name)
+        self._memo: dict[str, np.ndarray] = {}  # text -> vector, reused across configs in one run
 
     def _encode(self, texts: list[str]) -> np.ndarray:
-        return self.model.encode(texts, batch_size=32, normalize_embeddings=True, show_progress_bar=False)
+        """Encode texts, computing only those not seen before in this process."""
+        new = list(dict.fromkeys(t for t in texts if t not in self._memo))
+        if new:
+            vectors = self.model.encode(new, batch_size=32, normalize_embeddings=True, show_progress_bar=False)
+            self._memo.update(zip(new, vectors))
+        return np.array([self._memo[t] for t in texts])
 
     def passages(self, texts: list[str]) -> np.ndarray:
         return self._encode([self.passage_prefix + t for t in texts])
