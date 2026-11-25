@@ -28,6 +28,17 @@ EMBEDDERS = {
     "e5-base": ("intfloat/e5-base-v2", "query: ", "passage: "),
 }
 
+# Week 4: bge-small adapted to the AI Act (trained by adapt.py, stored in data/models/<name>).
+#   diag / linear: a learned transformation of the query vector; passages are unchanged.
+#   lora: bge-small with LoRA weights merged in (both queries and passages change).
+ADAPTED_EMBEDDERS = {
+    "bge-small-diag-grad": ("bge-small", "diag"),
+    "bge-small-diag-cmaes": ("bge-small", "diag"),
+    "bge-small-linear": ("bge-small", "linear"),
+    "bge-small-lora": ("bge-small", "lora"),
+}
+MODELS_DIR = Path("data/models")
+
 TOKEN_RE = re.compile(r"\w+")
 
 
@@ -39,11 +50,11 @@ def tokenize(text: str) -> list[str]:
 class Embedder:
     """Wraps a sentence-transformers model; returns L2-normalised vectors."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, model_path: str | None = None):
         from sentence_transformers import SentenceTransformer  # slow import, only when needed
 
         model_name, self.query_prefix, self.passage_prefix = EMBEDDERS[name]
-        self.model = SentenceTransformer(model_name)
+        self.model = SentenceTransformer(model_path or model_name)
         self._memo: dict[str, np.ndarray] = {}  # text -> vector, reused across configs in one run
 
     def _encode(self, texts: list[str]) -> np.ndarray:
@@ -61,10 +72,38 @@ class Embedder:
         return self._encode([self.query_prefix + t for t in texts])
 
 
-@lru_cache(maxsize=3)
-def get_embedder(name: str) -> Embedder:
-    """Load each embedding model once per process."""
-    return Embedder(name)
+class QueryAdaptedEmbedder:
+    """A base embedder whose query vectors pass through a learned transformation.
+
+    diag:   q' = q * s   (one weight per dimension)
+    linear: q' = W q     (full matrix)
+    Passages are encoded by the unchanged base model, so their vectors are shared.
+    """
+
+    def __init__(self, base: Embedder, kind: str, weights: np.ndarray):
+        self.base, self.kind, self.weights = base, kind, weights
+
+    def passages(self, texts: list[str]) -> np.ndarray:
+        return self.base.passages(texts)
+
+    def queries(self, texts: list[str]) -> np.ndarray:
+        q = self.base.queries(texts)
+        q = q * self.weights if self.kind == "diag" else q @ self.weights.T
+        return q / np.maximum(np.linalg.norm(q, axis=1, keepdims=True), 1e-12)
+
+
+@lru_cache(maxsize=8)
+def get_embedder(name: str):
+    """Load each embedding model once per process (adapted ones from data/models/<name>)."""
+    if name not in ADAPTED_EMBEDDERS:
+        return Embedder(name)
+    base_name, kind = ADAPTED_EMBEDDERS[name]
+    folder = MODELS_DIR / name
+    if not folder.exists():
+        raise FileNotFoundError(f"{folder} not found: train it first with `python -m evo_rag.adapt`.")
+    if kind == "lora":
+        return Embedder(base_name, model_path=str(folder))
+    return QueryAdaptedEmbedder(get_embedder(base_name), kind, np.load(folder / "adapter.npy"))
 
 
 def load_corpus(path: Path = CORPUS_PATH) -> list[dict]:

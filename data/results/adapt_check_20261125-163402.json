@@ -1,0 +1,82 @@
+[
+ {
+  "setting": "dense only",
+  "embedder": "bge-small",
+  "evidence_recall": 0.7753164556962026,
+  "single_hop": 0.7941176470588235,
+  "multi_hop": 0.6111111111111112,
+  "numerical": 0.8620689655172413
+ },
+ {
+  "setting": "dense only",
+  "embedder": "bge-small-diag-grad",
+  "evidence_recall": 0.7911392405063291,
+  "single_hop": 0.8137254901960784,
+  "multi_hop": 0.6296296296296297,
+  "numerical": 0.8620689655172413
+ },
+ {
+  "setting": "dense only",
+  "embedder": "bge-small-diag-cmaes",
+  "evidence_recall": 0.7721518987341772,
+  "single_hop": 0.7843137254901961,
+  "multi_hop": 0.6296296296296297,
+  "numerical": 0.8620689655172413
+ },
+ {
+  "setting": "dense only",
+  "embedder": "bge-small-linear",
+  "evidence_recall": 0.8544303797468354,
+  "single_hop": 0.9019607843137255,
+  "multi_hop": 0.5925925925925926,
+  "numerical": 0.9310344827586207
+ },
+ {
+  "setting": "dense only",
+  "embedder": "bge-small-lora",
+  "evidence_recall": 0.8544303797468354,
+  "single_hop": 0.9019607843137255,
+  "multi_hop": 0.6666666666666666,
+  "numerical": 0.8620689655172413
+ },
+ {
+  "setting": "best pipeline",
+  "embedder": "bge-small",
+  "evidence_recall": 0.9778481012658228,
+  "single_hop": 0.9901960784313726,
+  "multi_hop": 0.9444444444444444,
+  "numerical": 0.9655172413793104
+ },
+ {
+  "setting": "best pipeline",
+  "embedder": "bge-small-diag-grad",
+  "evidence_recall": 0.9810126582278481,
+  "single_hop": 0.9901960784313726,
+  "multi_hop": 0.9629629629629629,
+  "numerical": 0.9655172413793104
+ },
+ {
+  "setting": "best pipeline",
+  "embedder": "bge-small-diag-cmaes",
+  "evidence_recall": 0.9778481012658228,
+  "single_hop": 0.9901960784313726,
+  "multi_hop": 0.9444444444444444,
+  "numerical": 0.9655172413793104
+ },
+ {
+  "setting": "best pipeline",
+  "embedder": "bge-small-linear",
+  "evidence_recall": 0.9873417721518988,
+  "single_hop": 1.0,
+  "multi_hop": 0.9629629629629629,
+  "numerical": 0.9655172413793104
+ },
+ {
+  "setting": "best pipeline",
+  "embedder": "bge-small-lora",
+  "evidence_recall": 0.9810126582278481,
+  "single_hop": 0.9901960784313726,
+  "multi_hop": 0.9629629629629629,
+  "numerical": 0.9655172413793104
+ }
+]

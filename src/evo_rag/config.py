@@ -13,7 +13,11 @@ class PipelineConfig(BaseModel):
     chunk_header: bool = True  # prefix each chunk with "Article 5: <title>"
 
     # --- Retrieval: how relevant chunks are found ---
-    embedder: Literal["bge-small", "bge-base", "e5-base"] = "bge-small"
+    # The bge-small-* variants are adapted to the AI Act in Week 4 (see adapt.py).
+    embedder: Literal[
+        "bge-small", "bge-base", "e5-base",
+        "bge-small-diag-grad", "bge-small-diag-cmaes", "bge-small-linear", "bge-small-lora",
+    ] = "bge-small"
     retrieval: Literal["dense", "bm25", "hybrid"] = "dense"
     hybrid_alpha: float = Field(0.5, ge=0.0, le=1.0)  # only used if retrieval == "hybrid"
     top_k: int = Field(5, ge=1, le=20)
