@@ -22,6 +22,7 @@ import numpy as np
 
 from evo_rag.config import PipelineConfig
 from evo_rag.generation import PROMPT_TEMPLATES, format_context
+from evo_rag.planner import Retrieval, retrieve
 from evo_rag.retrieval import build_retriever, load_corpus, minmax, tokenize
 from evo_rag.retrieval_eval import load_questions, score_question
 from evo_rag.search_space import config_key
@@ -60,7 +61,10 @@ def evidence_found(quotes: list[str], chunks: list, has_header: bool) -> float:
 
 
 class ProxyEvaluator:
-    def __init__(self, split: str = "dev", cache_path: Path = CACHE_PATH, **retriever_kwargs):
+    """llm is only needed for query_mode="decompose" (cached query plans; see planner.py)."""
+
+    def __init__(self, split: str = "dev", cache_path: Path = CACHE_PATH, llm=None, **retriever_kwargs):
+        self.llm = llm
         self.questions = load_questions(split)
         self.docs = load_corpus()
         self.cache_path = cache_path
@@ -84,26 +88,46 @@ class ProxyEvaluator:
 
     def _score(self, config: PipelineConfig) -> dict:
         start = time.perf_counter()
-        retriever = build_retriever(config, self.docs, **self.retriever_kwargs)
-        scores = self._all_scores(retriever)  # (n_questions, n_chunks)
-        template = PROMPT_TEMPLATES[config.prompt_template]
-        recalls, evidence, tokens = [], [], []
-        for q, row in zip(self.questions, scores):
-            top = np.argsort(-row)[: config.top_k]
-            chunks = [retriever.chunks[i] for i in top]
-            recalls.append(score_question([c.doc_id for c in chunks], set(q["doc_ids"]))["recall"])
-            evidence.append(evidence_found([quote for _, quote in q["evidence"]], chunks, config.chunk_header))
-            prompt = template["system"] + template["user"].format(
-                context=format_context(chunks), question=q["question"]
-            )
-            tokens.append(len(prompt) / CHARS_PER_TOKEN)
+        rows, n_chunks = self.per_question(config)
         return {
-            "recall": float(np.mean(recalls)),
-            "evidence_recall": float(np.mean(evidence)),
-            "tokens": float(np.mean(tokens)),
-            "n_chunks": len(retriever.chunks),
+            "recall": float(np.mean([r["recall"] for r in rows])),
+            "evidence_recall": float(np.mean([r["evidence_recall"] for r in rows])),
+            "tokens": float(np.mean([r["tokens"] for r in rows])),
+            "n_chunks": n_chunks,
             "seconds": time.perf_counter() - start,
         }
+
+    def per_question(self, config: PipelineConfig) -> tuple[list[dict], int]:
+        """Proxy scores for every question (not cached), plus the number of chunks.
+
+        tokens = generator input tokens, plus the planning call (if any) converted to
+        input-token equivalents, so the cost objective includes the planner's price.
+        """
+        retriever = build_retriever(config, self.docs, **self.retriever_kwargs)
+        template = PROMPT_TEMPLATES[config.prompt_template]
+        if config.query_mode == "single":
+            scores = self._all_scores(retriever)  # (n_questions, n_chunks), batched
+            found = [
+                Retrieval([retriever.chunks[i] for i in np.argsort(-row)[: config.top_k]], [q["question"]])
+                for q, row in zip(self.questions, scores)
+            ]
+        else:
+            if self.llm is None:
+                raise ValueError("query_mode='decompose' needs ProxyEvaluator(llm=LLM()) for query plans.")
+            found = [retrieve(q["question"], retriever, config, self.llm) for q in self.questions]
+
+        rows = []
+        for q, f in zip(self.questions, found):
+            prompt = template["system"] + template["user"].format(context=format_context(f.chunks), question=q["question"])
+            rows.append({
+                "qid": q["qid"],
+                "type": q["type"],
+                "recall": score_question([c.doc_id for c in f.chunks], set(q["doc_ids"]))["recall"],
+                "evidence_recall": evidence_found([quote for _, quote in q["evidence"]], f.chunks, config.chunk_header),
+                "tokens": len(prompt) / CHARS_PER_TOKEN + f.plan_cost_tokens,
+                "queries": f.queries,
+            })
+        return rows, len(retriever.chunks)
 
     def _all_scores(self, retriever) -> np.ndarray:
         """Relevance scores for every question at once (batched, so dense search is fast)."""

@@ -7,6 +7,11 @@ Two scores per answer:
 Abstentions are scored by rule, without calling the judge:
   - abstaining on an unanswerable question: correct and faithful
   - abstaining on an answerable question: incorrect, but faithful (it invented nothing)
+
+An answerable question whose answer gives real content AND the abstention sentence (it
+answered one part and said another part is missing) is not a pure abstention: it goes to
+the judge, which can give partial credit. On an unanswerable question, any answer that
+contains the abstention sentence counts as declining.
 """
 
 import json
@@ -64,7 +69,16 @@ def normalise(text: str) -> str:
 
 
 def is_abstention(answer: str) -> bool:
+    """The answer contains the abstention sentence (possibly with other text)."""
     return normalise(ABSTAIN) in normalise(answer)
+
+
+def is_pure_abstention(answer: str, max_extra_words: int = 6) -> bool:
+    """The answer is the abstention sentence and little else."""
+    if not is_abstention(answer):
+        return False
+    remaining = normalise(answer).replace(normalise(ABSTAIN), " ").split()
+    return len(remaining) <= max_extra_words
 
 
 def judge_answer(
@@ -73,10 +87,10 @@ def judge_answer(
     """`question` is a QA record; `chunks` are the Chunk objects the generator saw."""
     unanswerable = question["type"] == "unanswerable"
 
-    if is_abstention(answer):
-        score = 1.0 if unanswerable else 0.0
-        reason = "Correct abstention." if unanswerable else "Abstained on an answerable question."
-        return Judgement(correctness=score, faithful=1.0, abstained=True, reason=reason)
+    if unanswerable and is_abstention(answer):
+        return Judgement(correctness=1.0, faithful=1.0, abstained=True, reason="Correct abstention.")
+    if not unanswerable and is_pure_abstention(answer):
+        return Judgement(correctness=0.0, faithful=1.0, abstained=True, reason="Abstained on an answerable question.")
 
     prompt = JUDGE_PROMPT.format(
         question=question["question"],

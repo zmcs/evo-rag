@@ -18,6 +18,8 @@ class PipelineConfig(BaseModel):
     hybrid_alpha: float = Field(0.5, ge=0.0, le=1.0)  # only used if retrieval == "hybrid"
     top_k: int = Field(5, ge=1, le=20)
     reranker: bool = False
+    # "decompose": an LLM splits the question into search queries (see planner.py)
+    query_mode: Literal["single", "decompose"] = "single"
 
     # --- Generation: how the answer is written ---
     generator: Literal["gemini-3.5-flash-lite"] = "gemini-3.5-flash-lite"

@@ -65,7 +65,8 @@ def short(config: PipelineConfig) -> str:
     embedder = "" if config.retrieval == "bm25" and config.chunker != "semantic" else f" {config.embedder}"
     return (
         f"{config.retrieval}{alpha}{embedder} | {config.chunker} {config.chunk_size}"
-        f"{' +hdr' if config.chunk_header else ''} | k={config.top_k} | {config.prompt_template}"
+        f"{' +hdr' if config.chunk_header else ''} | k={config.top_k}"
+        f"{' | planning' if config.query_mode == 'decompose' else ''} | {config.prompt_template}"
     )
 
 

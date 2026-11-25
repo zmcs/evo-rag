@@ -1,0 +1,98 @@
+[
+ {
+  "config": {
+   "chunker": "recursive",
+   "chunk_size": 600,
+   "chunk_overlap": 0.2,
+   "chunk_header": false,
+   "embedder": "e5-base",
+   "retrieval": "hybrid",
+   "hybrid_alpha": 0.36,
+   "top_k": 2,
+   "reranker": false,
+   "query_mode": "single",
+   "generator": "gemini-3.5-flash-lite",
+   "prompt_template": "combine"
+  },
+  "short": "hybrid a=0.36 e5-base | recursive 600 | k=2 | combine",
+  "n": 50,
+  "proxy_recall": 0.6708860759493671,
+  "proxy_tokens": 286.5759493670886,
+  "correctness": 0.69,
+  "faithfulness": 0.98,
+  "cost": 0.00022809,
+  "real_tokens": 363.8
+ },
+ {
+  "config": {
+   "chunker": "semantic",
+   "chunk_size": 1800,
+   "chunk_overlap": 0.2,
+   "chunk_header": true,
+   "embedder": "e5-base",
+   "retrieval": "bm25",
+   "hybrid_alpha": 0.5,
+   "top_k": 3,
+   "reranker": false,
+   "query_mode": "single",
+   "generator": "gemini-3.5-flash-lite",
+   "prompt_template": "combine"
+  },
+  "short": "bm25 e5-base | semantic 1800 +hdr | k=3 | combine",
+  "n": 50,
+  "proxy_recall": 0.7056962025316456,
+  "proxy_tokens": 656.8,
+  "correctness": 0.73,
+  "faithfulness": 1.0,
+  "cost": 0.00033896999999999996,
+  "real_tokens": 737.4
+ },
+ {
+  "config": {
+   "chunker": "recursive",
+   "chunk_size": 600,
+   "chunk_overlap": 0.0,
+   "chunk_header": false,
+   "embedder": "bge-small",
+   "retrieval": "hybrid",
+   "hybrid_alpha": 0.41,
+   "top_k": 13,
+   "reranker": false,
+   "query_mode": "decompose",
+   "generator": "gemini-3.5-flash-lite",
+   "prompt_template": "combine"
+  },
+  "short": "hybrid a=0.41 bge-small | recursive 600 | k=13 | planning | combine",
+  "n": 50,
+  "proxy_recall": 0.8734177215189873,
+  "proxy_tokens": 1717.1936708860762,
+  "correctness": 0.85,
+  "faithfulness": 1.0,
+  "cost": 0.000725508,
+  "real_tokens": 1433.52
+ },
+ {
+  "config": {
+   "chunker": "recursive",
+   "chunk_size": 1600,
+   "chunk_overlap": 0.0,
+   "chunk_header": true,
+   "embedder": "bge-small",
+   "retrieval": "hybrid",
+   "hybrid_alpha": 0.37,
+   "top_k": 13,
+   "reranker": false,
+   "query_mode": "decompose",
+   "generator": "gemini-3.5-flash-lite",
+   "prompt_template": "combine"
+  },
+  "short": "hybrid a=0.37 bge-small | recursive 1600 +hdr | k=13 | planning | combine",
+  "n": 50,
+  "proxy_recall": 0.9778481012658228,
+  "proxy_tokens": 3943.1012658227846,
+  "correctness": 0.99,
+  "faithfulness": 1.0,
+  "cost": 0.0014238780000000002,
+  "real_tokens": 3666.42
+ }
+]

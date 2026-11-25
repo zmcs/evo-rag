@@ -100,7 +100,10 @@ def main() -> None:
     parser.add_argument("--min-quality", type=float, default=None,
                         help="skip front members below this proxy score (default 0.75 recall / 0.65 evidence)")
     parser.add_argument("--n", type=int, default=50)
-    parser.add_argument("--full", type=int, default=3, help="best configs re-run on the whole dev set")
+    parser.add_argument("--full", type=int, default=0,
+                        help="best configs re-run on the whole dev set (expensive; default 0)")
+    parser.add_argument("--prompt", default=None,
+                        help="evaluate every pipeline with this prompt template, e.g. combine")
     parser.add_argument("--yes", action="store_true", help="run (otherwise only estimate the cost)")
     args = parser.parse_args()
 
@@ -114,6 +117,8 @@ def main() -> None:
     llm = LLM()
 
     configs = [PipelineConfig(**p["config"]) for p in picks]
+    if args.prompt:
+        configs = [c.model_copy(update={"prompt_template": args.prompt}) for c in configs]
     low = [estimate_usd(p["tokens"], args.n, c.generator) for p, c in zip(picks, configs)]
     extra = sorted((estimate_usd(p["tokens"], n_full - args.n, c.generator) for p, c in zip(picks, configs)),
                    reverse=True)[: args.full]  # pessimistic: assume the most expensive ones win
@@ -124,6 +129,11 @@ def main() -> None:
     print(f"\nEstimated cost: ~${total:.2f}   (spent so far ${llm.total_spend():.2f} "
           f"of the ${llm.budget_usd:.2f} budget)")
     print("Pipelines already evaluated in the landscape run are served from the cache for free.")
+    remaining = llm.budget_usd - llm.total_spend()
+    if total > remaining:
+        print(f"\nRefusing to run: the estimate (${total:.2f}) exceeds what is left under the budget "
+              f"(${remaining:.2f}). Use fewer --max-configs or a smaller --n.")
+        return
     if not args.yes:
         print("Dry run only. Re-run with --yes to evaluate.")
         return

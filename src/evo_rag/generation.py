@@ -28,6 +28,20 @@ PROMPT_TEMPLATES = {
         ),
         "user": "Context:\n{context}\n\nQuestion: {question}",
     },
+    # Week 3: multi-hop answers were refused even when every passage needed was in the
+    # context. This template asks the model to follow references between passages.
+    "combine": {
+        "system": (
+            "You answer questions about the EU AI Act using only the context provided. "
+            "The answer may require combining several passages: for example an obligation in one "
+            "article and the penalty for breaching it in another, or a rule that refers to "
+            "'point 1(a) of Annex III' and the annex entry describing that point. Follow such "
+            "references between passages and combine them. Answer every part of the question that "
+            "the context supports; if one part is not covered, say briefly which part. "
+            f'Only if the context answers no part of the question, reply exactly: "{ABSTAIN}"'
+        ),
+        "user": "Context:\n{context}\n\nQuestion: {question}\n\nAnswer:",
+    },
 }
 
 

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from evo_rag.config import PipelineConfig
 from evo_rag.generation import generate_answer
 from evo_rag.llm import LLM, LLMResponse
+from evo_rag.planner import retrieve
 from evo_rag.retrieval import Retriever, build_retriever
 
 
@@ -26,7 +27,7 @@ class Pipeline:
         self.config, self.retriever, self.llm = config, retriever, llm
 
     def ask(self, question: str) -> PipelineResult:
-        chunks = [chunk for chunk, _ in self.retriever.search(question)]
+        chunks = retrieve(question, self.retriever, self.config, self.llm).chunks
         response = generate_answer(question, chunks, self.config, self.llm)
         return PipelineResult(
             question=question,

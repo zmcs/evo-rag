@@ -111,10 +111,13 @@ class Retriever:
         alpha = self.config.hybrid_alpha
         return alpha * minmax(dense) + (1 - alpha) * minmax(self.bm25.get_scores(tokenize(query)))
 
+    def ranked_indices(self, query: str, k: int | None = None) -> np.ndarray:
+        """Indices of the k best chunks for a query, best first."""
+        return np.argsort(-self.scores(query))[: k or self.config.top_k]
+
     def search(self, query: str, k: int | None = None) -> list[tuple[Chunk, float]]:
-        k = k or self.config.top_k
         scores = self.scores(query)
-        top = np.argsort(-scores)[:k]
+        top = np.argsort(-scores)[: k or self.config.top_k]
         return [(self.chunks[i], float(scores[i])) for i in top]
 
 

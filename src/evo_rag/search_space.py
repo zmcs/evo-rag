@@ -10,8 +10,11 @@ Design notes
     the embedder is unused by plain BM25. Two genomes that build the same pipeline map to
     the same canonical config, so they count as duplicates and share one evaluation.
   - prompt_template is fixed during the proxy search (retrieval metrics cannot see it).
+  - query_mode chooses whether an LLM plans sub-queries before retrieval. Plans are cached,
+    so the proxy search stays free; the planning cost is part of the token objective.
 """
 
+import json
 import random
 
 from pymoo.core.variable import Binary, Choice, Integer, Real
@@ -31,6 +34,7 @@ VARIABLES = {
     "retrieval": Choice(options=["dense", "bm25", "hybrid"]),
     "hybrid_alpha": Real(bounds=(0.0, 1.0)),
     "top_k": Integer(bounds=(1, TOP_K_MAX)),
+    "query_mode": Choice(options=["single", "decompose"]),
 }
 
 
@@ -48,13 +52,21 @@ def to_config(x: dict, prompt_template: str = "default") -> PipelineConfig:
         retrieval=retrieval,
         hybrid_alpha=round(float(x["hybrid_alpha"]), 2) if retrieval == "hybrid" else 0.5,
         top_k=int(x["top_k"]),
+        query_mode=x.get("query_mode", "single"),
         prompt_template=prompt_template,
     )
 
 
 def config_key(config: PipelineConfig) -> str:
-    """Identity of a pipeline: equal keys mean identical pipelines."""
-    return config.model_dump_json()
+    """Identity of a pipeline: equal keys mean identical pipelines.
+
+    query_mode is left out when it has its original value ("single"), so pipelines scored
+    before that gene existed keep their keys and their cached results stay valid.
+    """
+    data = config.model_dump()
+    if data.get("query_mode") == "single":
+        data.pop("query_mode")
+    return json.dumps(data, separators=(",", ":"))
 
 
 def random_genome(rng: random.Random) -> dict:
@@ -68,4 +80,5 @@ def random_genome(rng: random.Random) -> dict:
         "retrieval": rng.choice(VARIABLES["retrieval"].options),
         "hybrid_alpha": rng.random(),
         "top_k": rng.randint(1, TOP_K_MAX),
+        "query_mode": rng.choice(VARIABLES["query_mode"].options),
     }

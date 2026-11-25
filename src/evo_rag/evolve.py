@@ -33,6 +33,7 @@ from pymoo.operators.selection.rnd import RandomSelection
 from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
 
+from evo_rag.llm import LLM
 from evo_rag.proxy import ProxyEvaluator
 from evo_rag.search_space import VARIABLES, config_key, random_genome, to_config
 
@@ -209,7 +210,9 @@ def main(**evaluator_kwargs) -> None:
     global OBJECTIVE
     OBJECTIVE = args.objective
 
-    evaluator = ProxyEvaluator(**evaluator_kwargs)
+    # The LLM is only used for query plans of query_mode="decompose". Plans are cached from
+    # `decompose_check --plan`, so this search makes no paid calls.
+    evaluator = ProxyEvaluator(llm=LLM(), **evaluator_kwargs)
     print(f"Proxy cache holds {len(evaluator.cache)} pipelines already scored.\n")
     print(f"NSGA-II: population {args.pop}, {args.gens} generations, objective {OBJECTIVE}, "
           f"{args.selection} parent selection")
@@ -229,7 +232,8 @@ def main(**evaluator_kwargs) -> None:
         c = row["config"]
         print(f"  recall {row['recall']:.3f}  evidence {row['evidence_recall']:.3f}  tokens {row['tokens']:6.0f}  "
               f"{c['retrieval']} {c['embedder']} | {c['chunker']} {c['chunk_size']} "
-              f"ov={c['chunk_overlap']} {'+hdr' if c['chunk_header'] else ''} | k={c['top_k']}")
+              f"ov={c['chunk_overlap']} {'+hdr' if c['chunk_header'] else ''} | k={c['top_k']}"
+              f"{' | planning' if c.get('query_mode') == 'decompose' else ''}")
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

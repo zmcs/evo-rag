@@ -1,0 +1,132 @@
+====================================================================================================
+hybrid a=0.37 bge-small | recursive 1600 +hdr | k=13 | default | query_mode=single   (27 multi_hop questions)
+  correct                 21
+  retrieval miss           5
+  synthesis: abstained     1
+  synthesis: partial       0
+  synthesis: incorrect     0
+
+  --- q193 [synthesis: abstained]
+  Q:      What fine could a deployer face for publishing an undisclosed deep fake?
+  GOLD:   Disclosing deep fakes is an Article 50 transparency obligation, and breaching Article 50 is fined up to EUR 15 000 000 or 3 % of worldwide annual turnover, whichever is higher.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   (question only)
+
+====================================================================================================
+hybrid a=0.37 bge-small | recursive 1600 +hdr | k=13 | default | query_mode=decompose   (27 multi_hop questions)
+  correct                 21
+  retrieval miss           2
+  synthesis: abstained     4
+  synthesis: partial       0
+  synthesis: incorrect     0
+
+  --- q207 [synthesis: abstained]
+  Q:      What fine can a deployer face for using a high-risk AI system at work without informing workers' representatives?
+  GOLD:   Informing workers is a deployer obligation under Article 26, and non-compliance with Article 26 is fined up to EUR 15 000 000 or 3 % of worldwide turnover, whichever is higher.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   Article 26 deployer obligation inform workers representatives high risk AI system | Article 99 fines infringement obligations deployer high risk AI system
+
+  --- q197 [synthesis: abstained]
+  Q:      If a GPAI model with systemic risk is released as open source, is it exempt from providing technical documentation, and what fine could non-compliance bring?
+  GOLD:   No; the open-source exemption does not apply to models with systemic risk. The Commission can fine up to 3 % of worldwide turnover or EUR 15 000 000, whichever is higher.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   GPAI model systemic risk open source exemption technical documentation | penalties fines breach obligations general purpose AI models systemic risk
+
+  --- q198 [synthesis: abstained]
+  Q:      A distributor rebrands a high-risk AI system under its own name. Must it affix the CE marking and register the system?
+  GOLD:   Yes. Putting its name on the system makes it the provider under Article 25, so it takes on all Article 16 provider obligations, including CE marking and registration.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   Article 25 considered provider high-risk AI system | Article 48 CE marking high-risk AI system | Article 49 registration high-risk AI system EU database
+
+  --- q202 [synthesis: abstained]
+  Q:      What must the logs of a remote biometric identification system record at a minimum?
+  GOLD:   For Annex III point 1(a) systems: the period of each use (start and end), the reference database checked, the input data that led to a match, and the identity of the people who verified the results.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   remote biometric identification system logs recording requirements | high-risk AI systems automatic logging logs EU AI Act
+
+====================================================================================================
+hybrid a=0.62 bge-small | semantic 600 +hdr | k=13 | default | query_mode=single   (27 multi_hop questions)
+  correct                 16
+  retrieval miss           7
+  synthesis: abstained     4
+  synthesis: partial       0
+  synthesis: incorrect     0
+
+  --- q191 [synthesis: abstained]
+  Q:      Where is an AI system that manages a city's water supply registered?
+  GOLD:   At national level. Safety components for water supply are Annex III point 2 (critical infrastructure), and Article 49 says point 2 systems are registered at national level rather than in the EU database.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   (question only)
+
+  --- q223 [synthesis: abstained]
+  Q:      Which public bodies deploying high-risk AI must both register their use in the EU database and conduct a fundamental rights impact assessment?
+  GOLD:   Public authorities (and Union bodies) deploying Annex III systems other than critical infrastructure must register their use, and bodies governed by public law must also perform a fundamental rights impact assessment before deployment.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   (question only)
+
+  --- q193 [synthesis: abstained]
+  Q:      What fine could a deployer face for publishing an undisclosed deep fake?
+  GOLD:   Disclosing deep fakes is an Article 50 transparency obligation, and breaching Article 50 is fined up to EUR 15 000 000 or 3 % of worldwide annual turnover, whichever is higher.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   (question only)
+
+  --- q196 [synthesis: abstained]
+  Q:      What testing obligation applies to a general-purpose AI model trained above the compute threshold for high-impact capabilities?
+  GOLD:   Above the threshold the model is presumed to have systemic risk, so its provider must perform model evaluation with state-of-the-art protocols, including conducting and documenting adversarial testing.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   (question only)
+
+====================================================================================================
+hybrid a=0.62 bge-small | semantic 600 +hdr | k=13 | default | query_mode=decompose   (27 multi_hop questions)
+  correct                 15
+  retrieval miss           7
+  synthesis: abstained     5
+  synthesis: partial       0
+  synthesis: incorrect     0
+
+  --- q216 [synthesis: abstained]
+  Q:      Is an open-source social scoring system exempt from the AI Act because of its licence?
+  GOLD:   No. The open-source exemption does not cover AI systems falling under Article 5, and social scoring leading to detrimental or unjustified treatment is prohibited by Article 5.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   prohibited AI practices social scoring | AI Act scope open source licence free and open source AI components
+
+  --- q193 [synthesis: abstained]
+  Q:      What fine could a deployer face for publishing an undisclosed deep fake?
+  GOLD:   Disclosing deep fakes is an Article 50 transparency obligation, and breaching Article 50 is fined up to EUR 15 000 000 or 3 % of worldwide annual turnover, whichever is higher.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   deep fake transparency obligation deployer | penalties infringement of transparency obligations Article 99
+
+  --- q196 [synthesis: abstained]
+  Q:      What testing obligation applies to a general-purpose AI model trained above the compute threshold for high-impact capabilities?
+  GOLD:   Above the threshold the model is presumed to have systemic risk, so its provider must perform model evaluation with state-of-the-art protocols, including conducting and documenting adversarial testing.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   general-purpose AI model high-impact capabilities evaluation testing | compute threshold general-purpose AI models systemic risk obligations
+
+  --- q206 [synthesis: abstained]
+  Q:      A GPAI model launched in 2024 must comply with the AI Act by when, and when did GPAI obligations start for new models?
+  GOLD:   Models placed on the market before 2 August 2025 must comply by 2 August 2027; Chapter V (GPAI obligations) applies from 2 August 2025.
+  ANSWER: Based on the provided context, providers of general-purpose AI models that have been placed on the market before 2 August 2025 shall take the necessary steps in order to comply with the obligations laid down in this Regulation by 2 August 2027. 
+
+The provided context does not contain the answer regarding the exact start date for obligations for new models other than the general application dates mentioned in the text.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   Article 111 application dates general purpose AI models | Article 112 entry into force and application
+
+  --- q202 [synthesis: abstained]
+  Q:      What must the logs of a remote biometric identification system record at a minimum?
+  GOLD:   For Annex III point 1(a) systems: the period of each use (start and end), the reference database checked, the input data that led to a match, and the identity of the people who verified the results.
+  ANSWER: The provided context does not contain the answer.
+  JUDGE:  Abstained on an answerable question.
+  PLAN:   remote biometric identification system logs recording requirements | high-risk AI systems automatic logging logs EU AI Act
+

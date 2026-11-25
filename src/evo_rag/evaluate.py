@@ -23,6 +23,7 @@ from evo_rag.config import PipelineConfig
 from evo_rag.generation import generate_answer
 from evo_rag.judge import judge_answer
 from evo_rag.llm import LLM
+from evo_rag.planner import retrieve
 from evo_rag.retrieval import build_retriever
 from evo_rag.retrieval_eval import score_question
 
@@ -59,17 +60,21 @@ def evaluate(
     repeat: int = 0,
     llm: LLM | None = None,
     log: bool = True,
+    question_types: list[str] | None = None,
     **retriever_kwargs,
 ) -> dict:
+    """question_types restricts the evaluation to some types, e.g. ["multi_hop"]."""
     llm = llm or LLM()
-    questions = ordered_questions(split, seed)[:n_questions]
+    questions = [q for q in ordered_questions(split, seed) if not question_types or q["type"] in question_types]
+    questions = questions[:n_questions]
     retriever = build_retriever(config, **retriever_kwargs)
 
     records = []
     for q in questions:
         start = time.perf_counter()
-        chunks = [c for c, _ in retriever.search(q["question"])]
-        retrieval_s = time.perf_counter() - start
+        found = retrieve(q["question"], retriever, config, llm, cache_salt=repeat)
+        chunks = found.chunks
+        retrieval_s = time.perf_counter() - start + found.plan_latency_s
 
         response = generate_answer(q["question"], chunks, config, llm, cache_salt=repeat)
         verdict = judge_answer(q, response.text, chunks, llm, cache_salt=repeat)
@@ -81,7 +86,8 @@ def evaluate(
             "retrieved_docs": retrieved_docs,
             "chunk_ids": [c.chunk_id for c in chunks],
             **asdict(verdict),
-            "gen_cost_usd": response.cost_usd,
+            "gen_cost_usd": response.cost_usd + found.plan_cost_usd,  # pipeline cost incl. planning
+            "queries": found.queries,
             "input_tokens": response.input_tokens,
             "output_tokens": response.output_tokens + response.thinking_tokens,
             "latency_s": retrieval_s + response.latency_s,
@@ -99,6 +105,7 @@ def evaluate(
         "seed": seed,
         "repeat": repeat,
         "qa_version": qa_version(),
+        "question_types": question_types,
         "metrics": metrics,
     }
     if log:
