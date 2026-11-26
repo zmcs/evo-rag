@@ -7,7 +7,7 @@ embedding model, context size, query planning) is searched with multi-objective 
 algorithms, trading answer quality against cost. The whole project, including every experiment,
 cost about **€3.75** in API calls.
 
-**[▶ Live demo: compare the pipelines' answers](https://zmcs.github.io/evo-rag/)**: all 75 test questions, each pipeline's answer next to the verified reference answer, plus how the project was built.
+**[Demo: compare the pipelines' answers](https://zmcs.github.io/evo-rag/)**: all 75 test questions, each pipeline's answer next to the verified reference answer, plus how the project was built.
 
 ## Results
 
