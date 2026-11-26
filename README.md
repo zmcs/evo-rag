@@ -26,7 +26,7 @@ Held-out test set: 75 questions never used during development.
   *reviewed* column. Both are reported because the issue was found after the test run.
 
 ![Final front vs initial random baseline](docs/validate.png)
-*Real correctness vs cost on 50 dev questions: final system (blue) vs the initial random-search baseline (orange).*
+*Real correctness vs cost on 50 dev questions. Each point is a different pipeline configuration: orange from the initial random search, blue evolved by NSGA-II. The top-right blue point is the pipeline selected for the final test.*
 
 ## How it works
 
